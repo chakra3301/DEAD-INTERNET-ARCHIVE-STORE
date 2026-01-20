@@ -23,7 +23,7 @@ export function PageLayout({
 }) {
   return (
     <Aside.Provider>
-      <CartAside cart={cart} />
+      {/* CartAside removed - using integrated CRT screen cart instead */}
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
       {header && (
@@ -35,11 +35,7 @@ export function PageLayout({
         />
       )}
       <main>{children}</main>
-      <Footer
-        footer={footer}
-        header={header}
-        publicStoreDomain={publicStoreDomain}
-      />
+      {/* Footer hidden for single-page CRT design */}
     </Aside.Provider>
   );
 }

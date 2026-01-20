@@ -9,7 +9,7 @@ import {CartSummary} from './CartSummary';
  * It is used by both the /cart route and the cart aside dialog.
  * @param {CartMainProps}
  */
-export function CartMain({layout, cart: originalCart}) {
+export function CartMain({layout, cart: originalCart, onBackToProducts}) {
   // The useOptimisticCart hook applies pending actions to the cart
   // so the user immediately sees feedback when they modify the cart.
   const cart = useOptimisticCart(originalCart);
@@ -21,15 +21,28 @@ export function CartMain({layout, cart: originalCart}) {
   const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
   const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
 
+  // Handle null/undefined cart
+  if (!cart) {
+    return (
+      <div className={className}>
+        <CartEmpty hidden={false} layout={layout} onBackToProducts={onBackToProducts} />
+      </div>
+    );
+  }
+
   return (
     <div className={className}>
-      <CartEmpty hidden={linesCount} layout={layout} />
+      <CartEmpty hidden={linesCount} layout={layout} onBackToProducts={onBackToProducts} />
       <div className="cart-details">
         <div aria-labelledby="cart-lines">
           <ul>
-            {(cart?.lines?.nodes ?? []).map((line) => (
-              <CartLineItem key={line.id} line={line} layout={layout} />
-            ))}
+            {(cart?.lines?.nodes ?? []).map((line) => {
+              // Filter out lines with invalid product data
+              if (!line?.merchandise?.product?.handle) {
+                return null;
+              }
+              return <CartLineItem key={line.id} line={line} layout={layout} />;
+            })}
           </ul>
         </div>
         {cartHasItems && <CartSummary cart={cart} layout={layout} />}
@@ -42,10 +55,20 @@ export function CartMain({layout, cart: originalCart}) {
  * @param {{
  *   hidden: boolean;
  *   layout?: CartMainProps['layout'];
+ *   onBackToProducts?: () => void;
  * }}
  */
-function CartEmpty({hidden = false}) {
+function CartEmpty({hidden = false, onBackToProducts}) {
   const {close} = useAside();
+  
+  const handleContinueShopping = () => {
+    if (onBackToProducts) {
+      onBackToProducts();
+    } else {
+      close();
+    }
+  };
+  
   return (
     <div hidden={hidden}>
       <br />
@@ -54,9 +77,15 @@ function CartEmpty({hidden = false}) {
         started!
       </p>
       <br />
-      <Link to="/collections" onClick={close} prefetch="viewport">
-        Continue shopping →
-      </Link>
+      {onBackToProducts ? (
+        <button onClick={handleContinueShopping} className="crt-continue-shopping-btn">
+          Continue shopping →
+        </button>
+      ) : (
+        <Link to="/" onClick={handleContinueShopping} prefetch="viewport">
+          Continue shopping →
+        </Link>
+      )}
     </div>
   );
 }

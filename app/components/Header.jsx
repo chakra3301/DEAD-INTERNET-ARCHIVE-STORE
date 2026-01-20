@@ -2,6 +2,7 @@ import {Suspense} from 'react';
 import {Await, NavLink, useAsyncValue} from 'react-router';
 import {useAnalytics, useOptimisticCart} from '@shopify/hydrogen';
 import {useAside} from '~/components/Aside';
+import logo from '~/assets/Dia_logo.png';
 
 /**
  * @param {HeaderProps}
@@ -9,16 +10,10 @@ import {useAside} from '~/components/Aside';
 export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
   return (
-    <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
+    <header className="header header-minimal">
+      <NavLink prefetch="intent" to="/" className="header-logo" end>
+        <img src={logo} alt="DIA Logo" />
       </NavLink>
-      <HeaderMenu
-        menu={menu}
-        viewport="desktop"
-        primaryDomainUrl={header.shop.primaryDomain.url}
-        publicStoreDomain={publicStoreDomain}
-      />
       <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
     </header>
   );
@@ -41,6 +36,9 @@ export function HeaderMenu({
   const className = `header-menu-${viewport}`;
   const {close} = useAside();
 
+  // Custom navigation for Dead Internet Archive
+  const customMenu = DEAD_INTERNET_MENU;
+
   return (
     <nav className={className} role="navigation">
       {viewport === 'mobile' && (
@@ -54,16 +52,7 @@ export function HeaderMenu({
           Home
         </NavLink>
       )}
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
-        if (!item.url) return null;
-
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
+      {customMenu.items.map((item) => {
         return (
           <NavLink
             className="header-menu-item"
@@ -72,7 +61,7 @@ export function HeaderMenu({
             onClick={close}
             prefetch="intent"
             style={activeLinkStyle}
-            to={url}
+            to={item.url}
           >
             {item.title}
           </NavLink>
@@ -89,15 +78,9 @@ function HeaderCtas({isLoggedIn, cart}) {
   return (
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        <Suspense fallback="Sign in">
-          <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
-          </Await>
-        </Suspense>
-      </NavLink>
-      <SearchToggle />
-      <CartToggle cart={cart} />
+      {/* Sign in button removed */}
+      {/* Search button removed */}
+      {/* Cart button removed - now in CRT screen */}
     </nav>
   );
 }
@@ -109,7 +92,7 @@ function HeaderMenuMobileToggle() {
       className="header-menu-mobile-toggle reset"
       onClick={() => open('mobile')}
     >
-      <h3>☰</h3>
+      <span style={{fontSize: '1.5rem', lineHeight: 1}}>☰</span>
     </button>
   );
 }
@@ -135,16 +118,29 @@ function CartBadge({count}) {
       href="/cart"
       onClick={(e) => {
         e.preventDefault();
-        open('cart');
-        publish('cart_viewed', {
-          cart,
-          prevCart,
-          shop,
-          url: window.location.href || '',
-        });
+        // Check if we're on the homepage (CRT screen)
+        if (window.location.pathname === '/') {
+          // Dispatch custom event to toggle cart view in CRT screen
+          window.dispatchEvent(new CustomEvent('toggleCartView'));
+          publish('cart_viewed', {
+            cart,
+            prevCart,
+            shop,
+            url: window.location.href || '',
+          });
+        } else {
+          // On other pages, use the aside panel
+          open('cart');
+          publish('cart_viewed', {
+            cart,
+            prevCart,
+            shop,
+            url: window.location.href || '',
+          });
+        }
       }}
     >
-      Cart {count === null ? <span>&nbsp;</span> : count}
+      Cart {count === null ? <span>&nbsp;</span> : `(${count})`}
     </a>
   );
 }
@@ -167,6 +163,28 @@ function CartBanner() {
   const cart = useOptimisticCart(originalCart);
   return <CartBadge count={cart?.totalQuantity ?? 0} />;
 }
+
+// Custom menu for Dead Internet Archive
+const DEAD_INTERNET_MENU = {
+  id: 'dead-internet-menu',
+  items: [
+    {
+      id: 'menu-clothing',
+      title: 'Clothing',
+      url: '/clothing',
+    },
+    {
+      id: 'menu-archives',
+      title: 'Archives',
+      url: '/archives',
+    },
+    {
+      id: 'menu-collections',
+      title: 'Collections',
+      url: '/collections',
+    },
+  ],
+};
 
 const FALLBACK_HEADER_MENU = {
   id: 'gid://shopify/Menu/199655587896',
@@ -218,8 +236,8 @@ const FALLBACK_HEADER_MENU = {
  */
 function activeLinkStyle({isActive, isPending}) {
   return {
-    fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? 'grey' : 'black',
+    fontWeight: isActive ? '500' : '300',
+    color: isPending ? 'var(--color-ghost)' : isActive ? 'var(--color-bright)' : 'var(--color-ghost)',
   };
 }
 

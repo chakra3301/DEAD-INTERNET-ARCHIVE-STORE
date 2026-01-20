@@ -1,5 +1,6 @@
 import {Suspense} from 'react';
 import {Await, NavLink} from 'react-router';
+import {GlitchText} from '~/components/GlitchText';
 
 /**
  * @param {FooterProps}
@@ -10,13 +11,25 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
       <Await resolve={footerPromise}>
         {(footer) => (
           <footer className="footer">
-            {footer?.menu && header.shop.primaryDomain?.url && (
+            <div className="footer-content">
+              <div className="footer-brand">
+                <GlitchText text="Dead Internet Archive" as="span" variant="corrupt" />
+                <p className="footer-tagline">Artifacts from the digital void</p>
+              </div>
               <FooterMenu
-                menu={footer.menu}
-                primaryDomainUrl={header.shop.primaryDomain.url}
+                menu={footer?.menu}
+                primaryDomainUrl={header?.shop?.primaryDomain?.url}
                 publicStoreDomain={publicStoreDomain}
               />
-            )}
+              <div className="footer-bottom">
+                <span className="footer-copyright">
+                  © {new Date().getFullYear()} Dead Internet Archive
+                </span>
+                <span className="footer-coordinates">
+                  Signal origin: Unknown
+                </span>
+              </div>
+            </div>
           </footer>
         )}
       </Await>
@@ -32,15 +45,16 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
  * }}
  */
 function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
+  const menuToUse = menu || FALLBACK_FOOTER_MENU;
+
   return (
     <nav className="footer-menu" role="navigation">
-      {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
+      {menuToUse.items.map((item) => {
         if (!item.url) return null;
-        // if the url is internal, we strip the domain
         const url =
           item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
+          item.url.includes(publicStoreDomain || '') ||
+          item.url.includes(primaryDomainUrl || '')
             ? new URL(item.url).pathname
             : item.url;
         const isExternal = !url.startsWith('/');
@@ -65,43 +79,27 @@ function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
 }
 
 const FALLBACK_FOOTER_MENU = {
-  id: 'gid://shopify/Menu/199655620664',
+  id: 'dead-internet-footer',
   items: [
     {
-      id: 'gid://shopify/MenuItem/461633060920',
-      resourceId: 'gid://shopify/ShopPolicy/23358046264',
-      tags: [],
-      title: 'Privacy Policy',
-      type: 'SHOP_POLICY',
+      id: 'footer-clothing',
+      title: 'Clothing',
+      url: '/clothing',
+    },
+    {
+      id: 'footer-archives',
+      title: 'Archives',
+      url: '/archives',
+    },
+    {
+      id: 'footer-privacy',
+      title: 'Privacy',
       url: '/policies/privacy-policy',
-      items: [],
     },
     {
-      id: 'gid://shopify/MenuItem/461633093688',
-      resourceId: 'gid://shopify/ShopPolicy/23358013496',
-      tags: [],
-      title: 'Refund Policy',
-      type: 'SHOP_POLICY',
-      url: '/policies/refund-policy',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461633126456',
-      resourceId: 'gid://shopify/ShopPolicy/23358111800',
-      tags: [],
-      title: 'Shipping Policy',
-      type: 'SHOP_POLICY',
-      url: '/policies/shipping-policy',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461633159224',
-      resourceId: 'gid://shopify/ShopPolicy/23358079032',
-      tags: [],
-      title: 'Terms of Service',
-      type: 'SHOP_POLICY',
+      id: 'footer-terms',
+      title: 'Terms',
       url: '/policies/terms-of-service',
-      items: [],
     },
   ],
 };
@@ -114,8 +112,8 @@ const FALLBACK_FOOTER_MENU = {
  */
 function activeLinkStyle({isActive, isPending}) {
   return {
-    fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? 'grey' : 'white',
+    fontWeight: isActive ? '500' : '300',
+    color: isPending ? 'var(--color-ghost)' : 'var(--color-ghost)',
   };
 }
 
