@@ -736,6 +736,155 @@ body.product-modal-open .header {
   background: transparent;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   Responsive Styles for Product Page
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Prevent horizontal scroll on all devices */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Mobile styles (up to 768px) */
+@media (max-width: 48em) {
+  /* Hide header on mobile product page */
+  body.crt-zoomed-in .header {
+    display: none !important;
+  }
+  
+  /* Hide CRT border frame on mobile - just show content */
+  .crt-border-frame {
+    display: none !important;
+  }
+  
+  /* Product page content - mobile optimized */
+  .crt-screen-content {
+    padding: 4rem 1rem 5rem 1rem !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-height: 100vh !important;
+    background: #d0d0d0 !important;
+  }
+  
+  /* Reduce CRT effects on mobile for better visibility */
+  .crt-screen-content-effects {
+    opacity: 0.3 !important;
+  }
+  
+  /* Title - visible at top on mobile */
+  .crt-screen-title {
+    position: relative !important;
+    font-size: 0.875rem !important;
+    padding: 0.5rem !important;
+    margin: 0 0 1rem 0 !important;
+    z-index: 200 !important;
+    color: #000000 !important;
+    background: transparent !important;
+  }
+  
+  /* Center cart button on mobile - always visible at top */
+  .crt-cart-button {
+    position: fixed !important;
+    top: 0.75rem !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 10003 !important;
+  }
+  
+  /* Ensure pulsating animation works with centered transform */
+  .crt-cart-button.pulsating {
+    transform: translateX(-50%) !important;
+  }
+  
+  /* Center social buttons at bottom - fixed position */
+  .social-buttons,
+  .crt-screen-content .social-buttons {
+    position: fixed !important;
+    bottom: 1rem !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    margin: 0 !important;
+    width: auto !important;
+    z-index: 10003 !important;
+    display: flex !important;
+    gap: 1rem !important;
+  }
+  
+  /* Product grid - single column on mobile */
+  .product-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 1rem !important;
+  }
+  
+  /* Product grid items - full width */
+  .product-grid-item {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+  }
+  
+  /* Product modal - full screen on mobile */
+  .product-modal {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    margin: 1rem !important;
+  }
+  
+  /* Hide overlay image on mobile */
+  .crt-screen-overlay {
+    display: none !important;
+  }
+}
+
+/* Tablet styles (768px - 1024px) */
+@media (min-width: 48em) and (max-width: 64em) {
+  .crt-screen-content {
+    padding: 3% 8% 3% 8% !important;
+  }
+  
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.5rem 1rem !important;
+  }
+  
+  .crt-screen-title {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Small desktop (1024px - 1440px) */
+@media (min-width: 64em) and (max-width: 90em) {
+  .crt-screen-content {
+    padding: 4% 10% 4% 10% !important;
+  }
+  
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* Large desktop (1440px+) */
+@media (min-width: 90em) {
+  .crt-screen-content {
+    padding: 5% 15% 4% 15% !important;
+  }
+  
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
 .header-logo {
   font-size: 1.25rem;
   font-weight: 300;
@@ -761,9 +910,7 @@ body.product-modal-open .header {
 }
 
 .header-menu-mobile-toggle {
-  @media (min-width: 48em) {
-    display: none;
-  }
+  display: none !important;
 }
 
 .header-menu-mobile {
@@ -1959,6 +2106,19 @@ main:has(.crt-page) {
   z-index: 10001; /* Above modal dark overlay */
 }
 
+/* CRT Outline Overlay on product page - Same as landing page */
+.crt-outline-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  z-index: 10002; /* Above border frame */
+  pointer-events: none;
+  filter: drop-shadow(0 20px 60px rgba(0, 0, 0, 0.8));
+}
+
 /* Hide landing when zoomed to allow body scroll */
 /* Content inside the screen */
 .crt-screen-content {
@@ -2524,6 +2684,8 @@ main:has(.crt-page) {
   padding: 0;
   margin: 1rem 0;
 }
+
+/* Mobile grid handled in responsive section above */
 
 .product-grid-item {
   display: flex;
