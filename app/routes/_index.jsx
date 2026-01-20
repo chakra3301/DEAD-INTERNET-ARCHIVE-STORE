@@ -6,6 +6,8 @@ import {AddToCartButton} from '~/components/AddToCartButton';
 import {CartMain} from '~/components/CartMain';
 import crtOutline from '~/assets/outline-2.png';
 import crtScreen from '~/assets/crt-screen.png';
+import channel1 from '~/assets/channel-1.png';
+import diaB from '~/assets/dia-b.png';
 import crtZoomed from '~/assets/zoomed-new.png';
 import overlay from '~/assets/overlay.png';
 
@@ -59,6 +61,7 @@ export default function Homepage() {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [productsList, setProductsList] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  const [currentScreenImage, setCurrentScreenImage] = useState(crtScreen);
   
   // Listen for cart view toggle from header
   useEffect(() => {
@@ -137,13 +140,28 @@ export default function Homepage() {
     };
   }, [selectedProduct]);
 
+  // Toggle between screen.png, channel-1.png, and dia-b.png every 3 seconds
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    
+    const images = [crtScreen, channel1, diaB];
+    let currentIndex = 0;
+    
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % images.length;
+      setCurrentScreenImage(images[currentIndex]);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className={`crt-page ${isZoomed ? 'zoomed' : ''}`}>
       {/* Landing State - Full CRT Monitor */}
       <div className="crt-landing" onClick={handleEnterScreen}>
         <div className="crt-monitor-stack">
           {/* Screen content behind */}
-          <img src={crtScreen} alt="CRT Screen" className="crt-screen-layer" />
+          <img src={currentScreenImage} alt="CRT Screen" className="crt-screen-layer" />
           {/* CRT screen effects overlay */}
           <div className="crt-screen-effects">
             <div className="crt-scanlines" />
