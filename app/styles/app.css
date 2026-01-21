@@ -753,14 +753,26 @@ html, body {
     display: none !important;
   }
   
-  /* Hide CRT border frame on mobile - just show content */
+  /* CRT border frame - stretch width, show top and bottom only */
   .crt-border-frame {
-    display: none !important;
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: -50% !important;
+    right: -50% !important;
+    bottom: 0 !important;
+    width: 200% !important;
+    height: 100% !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    pointer-events: none !important;
+    z-index: 10001 !important;
   }
   
-  /* Product page content - mobile optimized */
+  /* Product page content - full width, padding for top/bottom frame */
   .crt-screen-content {
-    padding: 4rem 1rem 5rem 1rem !important;
+    padding: 18vh 1rem 14vh 1rem !important;
     overflow-x: hidden !important;
     width: 100% !important;
     max-width: 100vw !important;
@@ -784,14 +796,16 @@ html, body {
     background: transparent !important;
   }
   
-  /* Center cart button on mobile - always visible at top */
+  /* Center cart button on mobile - below top frame */
   .crt-cart-button {
     position: fixed !important;
-    top: 0.75rem !important;
+    top: 18vh !important;
     left: 50% !important;
     right: auto !important;
     transform: translateX(-50%) !important;
     z-index: 10003 !important;
+    font-size: 10px !important;
+    padding: 4px 12px !important;
   }
   
   /* Ensure pulsating animation works with centered transform */
@@ -799,43 +813,65 @@ html, body {
     transform: translateX(-50%) !important;
   }
   
-  /* Center social buttons at bottom - fixed position */
+  /* Center social buttons at bottom - above bottom frame */
   .social-buttons,
   .crt-screen-content .social-buttons {
     position: fixed !important;
-    bottom: 1rem !important;
+    bottom: 14vh !important;
     left: 50% !important;
     right: auto !important;
-    transform: translateX(-50%) !important;
+    transform: translateX(-50%) translate(0, 50%) !important;
     margin: 0 !important;
     width: auto !important;
     z-index: 10003 !important;
     display: flex !important;
-    gap: 1rem !important;
+    gap: 0.75rem !important;
   }
   
-  /* Product grid - single column on mobile */
+  /* Smaller social buttons on mobile */
+  .social-button {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  /* Product grid - single column on mobile, full width */
   .product-grid {
     grid-template-columns: 1fr !important;
     gap: 1.5rem !important;
-    padding: 0 !important;
+    padding: 0 0.5rem !important;
     width: 100% !important;
     max-width: 100% !important;
     margin-top: 1rem !important;
   }
   
-  /* Product grid items - full width */
+  /* Product grid items - larger on mobile */
   .product-grid-item {
     width: 100%;
     max-width: 250px;
     margin: 0 auto;
   }
   
-  /* Product modal - full screen on mobile */
+  /* Product names on mobile */
+  .product-grid-name {
+    font-size: 0.8rem !important;
+  }
+  
+  /* Hide product grid when modal is open on mobile */
+  body.product-modal-open .product-grid {
+    display: none !important;
+  }
+  
+  /* Hide title and social buttons when modal is open on mobile */
+  body.product-modal-open .crt-screen-title,
+  body.product-modal-open .social-buttons {
+    display: none !important;
+  }
+  
+  /* Product modal - full width on mobile */
   .product-modal {
     width: 95vw !important;
     max-width: 95vw !important;
-    max-height: 90vh !important;
+    max-height: 75vh !important;
     margin: 1rem !important;
   }
   
@@ -1945,24 +1981,30 @@ main:has(.crt-page) {
   50% { opacity: 0.97; }
 }
 
-/* CRT Screen Effects Overlay - positioned to match screen layer */
+/* CRT Screen Effects Overlay - positioned to match screen layer exactly */
 .crt-screen-effects {
   position: absolute;
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 68%;
-  aspect-ratio: 4/3;
+  /* Match screen image height - use aspect ratio that covers most images */
+  /* For images with different ratios, this ensures full coverage */
+  aspect-ratio: 4 / 3;
+  min-height: 50vw; /* Ensure minimum coverage */
   pointer-events: none;
   z-index: 1;
   border-radius: 4px;
   overflow: hidden;
+  /* Cover the entire screen image area */
 }
 
-/* Scanlines */
+/* Scanlines - cover full effects container */
 .crt-scanlines {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   background: repeating-linear-gradient(
     0deg,
     rgba(0, 0, 0, 0.15) 0px,
@@ -1985,6 +2027,7 @@ main:has(.crt-page) {
   top: 0;
   left: 0;
   right: 0;
+  width: 100%;
   height: 4px;
   background: linear-gradient(
     180deg,
@@ -2013,6 +2056,8 @@ main:has(.crt-page) {
 .crt-glow {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   background: radial-gradient(
     ellipse at center,
     rgba(100, 255, 150, 0.03) 0%,

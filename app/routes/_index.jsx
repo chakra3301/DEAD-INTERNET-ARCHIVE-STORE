@@ -5,9 +5,16 @@ import {SocialButtons} from '~/components/SocialButtons';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {CartMain} from '~/components/CartMain';
 import crtOutline from '~/assets/outline-2.png';
-import crtScreen from '~/assets/crt-screen.png';
 import channel1 from '~/assets/channel-1.png';
+import channel2 from '~/assets/channel-2.png';
+import channel3 from '~/assets/channel-3.png';
+import channel4 from '~/assets/channel-4.png';
 import diaB from '~/assets/dia-b.png';
+import diaFuture from '~/assets/dia-future.png';
+import nokiaCute from '~/assets/nokia-cute.png';
+import nokiaDream from '~/assets/nokia-dream.png';
+import nokiaThai1 from '~/assets/nokia-thai-1.png';
+import nokiaType from '~/assets/nokia-type.png';
 import crtZoomed from '~/assets/zoomed-new.png';
 import overlay from '~/assets/overlay.png';
 
@@ -46,7 +53,7 @@ async function loadCriticalData({context}) {
 function loadDeferredData({context}) {
   const products = context.storefront.query(PRODUCTS_QUERY, {
     variables: {first: 20},
-  });
+    });
 
   return {
     products,
@@ -61,7 +68,7 @@ export default function Homepage() {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [productsList, setProductsList] = useState([]);
   const [showCart, setShowCart] = useState(false);
-  const [currentScreenImage, setCurrentScreenImage] = useState(crtScreen);
+  const [currentScreenImage, setCurrentScreenImage] = useState(channel1);
   
   // Listen for cart view toggle from header
   useEffect(() => {
@@ -78,6 +85,18 @@ export default function Homepage() {
   const handleEnterScreen = () => {
     setIsZoomed(true);
   };
+
+  // Auto-open first product modal on mobile when entering site
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const isMobile = window.innerWidth <= 768; // 48em = 768px
+    
+    if (isZoomed && isMobile && productsList.length > 0 && !selectedProduct) {
+      // Auto-open first product on mobile
+      setSelectedProduct(productsList[0]);
+    }
+  }, [isZoomed, productsList.length, selectedProduct]);
 
   const handleProductClick = (e, product, fullProductData) => {
     e.preventDefault();
@@ -140,11 +159,22 @@ export default function Homepage() {
     };
   }, [selectedProduct]);
 
-  // Toggle between screen.png, channel-1.png, and dia-b.png every 3 seconds
+  // Toggle between all CRT screen images every 3 seconds
   useEffect(() => {
     if (typeof document === 'undefined') return;
     
-    const images = [crtScreen, channel1, diaB];
+    const images = [
+      channel1,
+      channel2,
+      channel3,
+      channel4,
+      diaB,
+      diaFuture,
+      nokiaCute,
+      nokiaDream,
+      nokiaThai1,
+      nokiaType,
+    ];
     let currentIndex = 0;
     
     const interval = setInterval(() => {
@@ -154,6 +184,48 @@ export default function Homepage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Match CRT effects container height to screen image height
+  useEffect(() => {
+    if (typeof document === 'undefined' || isZoomed) return;
+    
+    const matchEffectsHeight = () => {
+      const screenLayer = document.querySelector('.crt-screen-layer');
+      const effectsContainer = document.querySelector('.crt-screen-effects');
+      
+      if (screenLayer && effectsContainer) {
+        const imageHeight = screenLayer.offsetHeight;
+        if (imageHeight > 0) {
+          effectsContainer.style.height = `${imageHeight}px`;
+        }
+      }
+    };
+    
+    // Match on load and when image changes
+    matchEffectsHeight();
+    const imageObserver = new MutationObserver(matchEffectsHeight);
+    const screenLayer = document.querySelector('.crt-screen-layer');
+    if (screenLayer) {
+      imageObserver.observe(screenLayer, { attributes: true, attributeFilter: ['src'] });
+    }
+    
+    // Also match when window resizes
+    window.addEventListener('resize', matchEffectsHeight);
+    
+    // Match when image loads
+    const screenImage = document.querySelector('.crt-screen-layer');
+    if (screenImage) {
+      screenImage.addEventListener('load', matchEffectsHeight);
+    }
+    
+    return () => {
+      imageObserver.disconnect();
+      window.removeEventListener('resize', matchEffectsHeight);
+      if (screenImage) {
+        screenImage.removeEventListener('load', matchEffectsHeight);
+      }
+    };
+  }, [currentScreenImage, isZoomed]);
 
   return (
     <div className={`crt-page ${isZoomed ? 'zoomed' : ''}`}>
